@@ -1,0 +1,81 @@
+Sergey
+Gorodecky
+2
+10
+1
+1 3
+2
+1
+3
+11
+Anton
+Kirilin
+2
+4
+1
+2
+5
+John
+Taylor
+2
+4
+1
+5
+Marina
+Malova
+3
+2
+4
+1
+5
+Antony
+Hopkins
+4
+2
+1
+1
+5
+Ruslan
+Khakimov
+3
+4
+2
+3
+3
+4
+1
+3
+3
+6
+8
+9
+6
+9
+4
+6
+11
+Fedor
+Krasilnikov
+3
+1
+3
+1
+404
+--------------------------------------------------------------------------------------
+Description:
+Here is an example of interaction with a program. It covers about 80% of its functional.
+What is going on here:
+I tested this program before, so there are some rides in the system already.
+Firstly, Sergey asks for his ride history (he got two rides, so
+you can see two rides description). Then he asks for the bill of his last ride and gets it.
+After that he creates a new ride: he chooses two points from the list his addresses,
+chooses car type (Comfort), accept conditions of the ride, and select payment method,
+When he creates this ride, drivers with "Comfort" car type get this (only those
+who is working now) get this ride as available ride, so they can accept or decline it.
+After you can see how different drivers enter their accounts and check available rides,
+and only those who is working now and have suitable car type can see this available ride.
+After that you can observe other functions: passenger "Ruslan Khakimov" adds and
+deletes payment methods, deletes and adds addresses to the list of his addresses. And
+Driver "Fedor Krasilnikov" observes his car, update his status.
+You can notice that the last printed value is "404". This is a secret command that
+tells the program not to save the results of the execution.
