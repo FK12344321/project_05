@@ -2,7 +2,7 @@
 #define UNTITLED3_DRIVER_H
 
 #include <utility>
-
+#include <map>
 #include "../Cars.h"
 #include "Person.h"
 
@@ -18,38 +18,57 @@ struct AvailableRide {
     Person* passenger;
     string passengerName;
     PaymentMethod paymentMethod;
+    Car* car;
     double price;
     double distance;
     Address* from;
     Address* to;
 
-    AvailableRide(Address* from, Address* to, Person* passenger, double price, double distance, PaymentMethod pm) {
+    AvailableRide(Address* from, Address* to, Person* passenger, double price, double distance, PaymentMethod pm, Car* car) {
         this->passengerName = passenger->getName();
         this->passenger = passenger;
         this->price = price;
         this->distance = distance;
         this->from = from;
         this->to = to;
+        this->car = car;
         paymentMethod = pm;
     }
 };
 
 class Driver : public Person {
 public:
-    Car* personalCar;
+    vector<Car*> personalCars;
     bool canWork;
     vector<struct AvailableRide*> availableRides;
+    map<string, bool> availableFunctions;
 
-    Driver(string name, double rating, Car* personalCar, bool canWork) : Person(move(name), rating) {
+    Driver(string name, double rating, vector<Car*> personalCars, bool canWork) : Person(move(name), rating) {
         this->canWork = canWork;
-        this->personalCar = personalCar;
+        this->personalCars = personalCars;
         availableRides = {};
         driverList.push_back(this);
         if (canWork) availableDriverList.push_back(this);
+        availableFunctions = {
+                {"showHistory", true},
+                {"showPersonalCars", true},
+                {"updateStatus", true},
+                {"checkOrders", true}
+        };
     }
 
-    void checkOrders(istream& in, bool printInput) {
-        // the function allow the driver to accept or decline available orders
+    void showPersonalCars() {
+        if (!availableFunctions["showPersonalCars"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
+        for (Car* car : personalCars) {
+            car->showCar();
+            cout << endl;
+        }
+    }
+
+    void showAvailableOrders() {
         int count = 0;
         for (struct AvailableRide* ride : availableRides) {
             count++;
@@ -60,6 +79,15 @@ public:
             printPaymentMethod(ride->paymentMethod);
             cout << endl;
         }
+    }
+
+    void checkOrders(istream& in, bool printInput) {
+        // the function allow the driver to accept or decline available orders
+        if (!availableFunctions["checkOrders"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
+        showAvailableOrders();
         cout << availableRides.size() + 1 << ") return back" << endl;
         cout << "Print a number of a ride you want to accept/decline or '" << availableRides.size() + 1;
         cout << "' if you want to return back" << endl;
@@ -82,14 +110,14 @@ public:
                 }
             }
             Person::createRide(availableRides[number - 1]->from, availableRides[number - 1]->to, this,
-                               availableRides[number - 1]->passenger, personalCar,
-                               availableRides[number - 1]->paymentMethod);
-            personalCar->x = history.back()->to.x;
-            personalCar->y = history.back()->to.y;
-            if (this->personalCar->carType == "Comfort" || this->personalCar->carType == "ComfortPlus")
-                ((Comfort*)(this->personalCar))->reduceFreeBottleCount();
-            if (this->personalCar->carType == "Business")
-                ((Business*)(this->personalCar))->parkRightInFrontOfTheEntrance();
+                               availableRides[number - 1]->passenger,
+                               availableRides[number - 1]->car, availableRides[number - 1]->paymentMethod);
+            availableRides[number - 1]->car->x = history.back()->to.x;
+            availableRides[number - 1]->car->y = history.back()->to.y;
+            if (availableRides[number - 1]->car->carType == "Comfort")
+                ((Comfort*)(availableRides[number - 1]->car))->reduceFreeBottleCount();
+            if (availableRides[number - 1]->car->carType == "Business")
+                ((Business*)(availableRides[number - 1]->car))->parkRightInFrontOfTheEntrance();
         }
     }
 
@@ -101,9 +129,21 @@ public:
         availableRides.push_back(newRide);
     }
 
+    void showHistoryDriver() {
+        if (!availableFunctions["showHistoryDriver"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
+        showHistory();
+    }
+
     void updateStatus(istream& in, bool printInput) {
+        if (!availableFunctions["updateStatus"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
         if (canWork) cout << "You are working now" << endl;
-        else cout << "You do not work now" << endl;
+        else cout << "You are not working now" << endl;
         cout << "Do you want to change your status?" << endl;
         cout << "1) yes" << endl << "2) no" << endl;
         int number;

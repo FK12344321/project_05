@@ -46,6 +46,7 @@ void uploadData() {
         output << car->y << endl;
         output << car->color << endl;
         output << car->number << endl;
+        output << car->wasValidated << endl;
     }
     output << "*" << endl << "**" << endl;
     count = -1;
@@ -56,10 +57,12 @@ void uploadData() {
         output << driver->name << endl;
         output << driver->rating << endl;
         for (int i = 0; i < carList.size(); i++) {
-            if (carList[i] == driver->personalCar) {
-                output << i << endl;
+            for (Car* car : driver->personalCars) {
+                if (car == carList[i]) output << i << ",";
             }
         }
+        if (driver->personalCars.empty()) output << ",," << endl;
+        else output << "," << endl;
         output << driver->canWork << endl;
     }
     output << "*" << endl << "**" << endl;
@@ -80,6 +83,10 @@ void uploadData() {
         for (PaymentMethod pm : passenger->paymentMethods)
             output << (int)pm << ",";
         if (passenger->paymentMethods.empty()) output << ",," << endl;
+        else output << "," << endl;
+        for (string device : passenger->devices)
+            output << device << ",";
+        if (passenger->devices.empty()) output << ",," << endl;
         else output << "," << endl;
     }
     output << "*" << endl << "**" << endl;
@@ -184,14 +191,16 @@ void downloadData() {
                     string color = currentLine;
                     getline(input, currentLine);
                     string carNumber = currentLine;
+                    getline(input, currentLine);
+                    bool wasValidated = (bool)stoi(currentLine);
                     if (carType == "Economy")
-                        auto car = new Economy(model, x, y, color, carNumber);
+                        auto car = new Economy(model, x, y, color, carNumber, wasValidated);
                     else if (carType == "Comfort")
-                        auto car = new Comfort(model, x, y, color, carNumber);
+                        auto car = new Comfort(model, x, y, color, carNumber, wasValidated);
                     else if (carType == "ComfortPlus")
-                        auto car = new ComfortPlus(model, x, y, color, carNumber);
+                        auto car = new ComfortPlus(model, x, y, color, carNumber, wasValidated);
                     else if (carType == "Business")
-                        auto car = new Business(model, x, y, color, carNumber);
+                        auto car = new Business(model, x, y, color, carNumber, wasValidated);
                     getline(input, currentLine);
                 }
                 break;
@@ -205,12 +214,18 @@ void downloadData() {
                     string name = currentLine;
                     getline(input, currentLine);
                     double rating = stod(currentLine);
-                    getline(input, currentLine);
-                    int personalCarNumber = stoi(currentLine);
+                    vector<Car*> cars;
+                    while (true) {
+                        string carNumber;
+                        getline(input, carNumber, ',');
+                        if (carNumber.empty()) break;
+                        cars.push_back(carList[stoi(carNumber)]);
+                    }
+                    getline(input, currentLine, '\n');
                     getline(input, currentLine);
                     bool canWork = (bool)stoi(currentLine);
-                    auto driver = new Driver(name, rating, carList[personalCarNumber], canWork);
                     getline(input, currentLine);
+                    auto driver = new Driver(name, rating, cars, canWork);
                 }
                 break;
             case 4:
@@ -239,7 +254,15 @@ void downloadData() {
                         pm.push_back((PaymentMethod)stoi(paymentMethod));
                     }
                     getline(input, currentLine, '\n');
-                    auto passenger = new Passenger(name, rating, addresses, pm);
+                    vector<string> devices;
+                    while (true) {
+                        string device;
+                        getline(input, device, ',');
+                        if (device.empty()) break;
+                        devices.push_back(device);
+                    }
+                    getline(input, currentLine, '\n');
+                    auto passenger = new Passenger(name, rating, devices, addresses, pm);
                     getline(input, currentLine);
                 }
                 break;

@@ -60,15 +60,44 @@ Krasilnikov
 1
 3
 1
+5
+Pavel
+Roganin
+1
+1 2
+1
+1
+2
+11
+Fedor
+Krasilnikov
+2
+4
+1
+404
+5
+Anton
+Kirilin
+2
+4
+1
+1
+5
+Pavel
+Roganin
+1
+13
+1
+1
 404
 --------------------------------------------------------------------------------------
 Description:
-Here is an example of interaction with a program. It covers about 80% of its functional.
+Here is an example of interaction of the program. It covers about 80% of its functional.
 What is going on here:
 I tested this program before, so there are some rides in the system already.
 Firstly, Sergey asks for his ride history (he got two rides, so
 you can see two rides description). Then he asks for the bill of his last ride and gets it.
-After that he creates a new ride: he chooses two points from the list his addresses,
+After that he creates a new ride: he chooses two points from the list of his addresses,
 chooses car type (Comfort), accept conditions of the ride, and select payment method,
 When he creates this ride, drivers with "Comfort" car type get this (only those
 who is working now) get this ride as available ride, so they can accept or decline it.
@@ -77,5 +106,12 @@ and only those who is working now and have suitable car type can see this availa
 After that you can observe other functions: passenger "Ruslan Khakimov" adds and
 deletes payment methods, deletes and adds addresses to the list of his addresses. And
 Driver "Fedor Krasilnikov" observes his car, update his status.
+After that Pavel Roganin orders a ride on "Economy" car. You can see how "Fedor Krasilnikov"
+looks at his cars (there is an "Economy" car, but it was not validated by admin, so he cannot
+this ride in the list of his available rides). After that "Anton Kirilin" looks at the list of
+his available rides (he has an "Economy" car that was validated by admin, so he can
+accept this ride and he does it). After that Pavel tries to order another one ride
+on the other device, but he cannot do it because his last ride was not finished yet)
 You can notice that the last printed value is "404". This is a secret command that
 tells the program not to save the results of the execution.
+In this example you can also see that some drivers have more then 1 car.

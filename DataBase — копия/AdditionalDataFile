@@ -82,6 +82,7 @@ Toyota Camry
 200
 Red
 A100AS
+1
 *
 1
 Economy
@@ -90,6 +91,7 @@ BMW m5
 50
 Blue
 Y001WS
+1
 *
 2
 Comfort
@@ -98,6 +100,7 @@ Lada Granta
 9876
 Yellow
 I002TP
+1
 *
 3
 Comfort
@@ -106,6 +109,7 @@ Ferrari f40
 563
 Red
 F020BN
+1
 *
 4
 ComfortPlus
@@ -114,6 +118,7 @@ Mercedes e200
 2983
 White
 U007VV
+1
 *
 5
 Comfort
@@ -122,43 +127,71 @@ UAZ 469
 11
 Brown
 H009BN
+1
+*
+6
+Economy
+Audi X5
+112
+76464
+Black
+G358BT
+1
+*
+7
+Business
+T-34
+1
+1
+Brown
+M002RT
+1
+*
+8
+Comfort
+Opel y3
+123
+321
+Grey
+O002OO
+1
 *
 **
 *
 0
 Anton Kirilin
 0
-2
+2,6,,
 1
 *
 1
 Andrey Kuzmicky
 5
-0
+0,,
 1
 *
 2
 Fedor Krasilnikov
 3.45
-1
+1,7,8,,
 1
 *
 3
 Antony Hopkins
 2.33
-3
+3,,
 1
 *
 4
 John Taylor
 1.22
-4
+4,,
 0
 *
 5
 Marina Malova
 4.99
-5
+5,,
 0
 *
 **
@@ -168,18 +201,21 @@ Ruslan Khakimov
 5
 0,1,3,,
 0,1,,
+Honor 1,Nokia 3310,,
 *
 1
 Pavel Roganin
 1.8
 0,2,4,,
 0,3,,
+Lenovo ideapad 330,Realme 6,,
 *
 2
 Sergey Gorodecky
 6
 0,4,6,,
 1,2,3,,
+Iphone X,Ipad Pro,,
 *
 **
 *
@@ -208,6 +244,6 @@ Sergey Gorodecky
 4
 *
 **
-1617998369
+1619105505
 **
 ***

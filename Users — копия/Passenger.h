@@ -11,6 +11,7 @@
 #include <fstream>
 #include <utility>
 #include <vector>
+#include <map>
 using namespace std;
 
 class Passenger;
@@ -24,15 +25,54 @@ class Passenger : public Person {
 public:
     vector<struct Address*> addresses;
     vector<PaymentMethod> paymentMethods;
-    vector<Ride> history;
-    Passenger(string name, double rating, vector<struct Address*> addresses={}, vector<PaymentMethod> paymentMethods={}) :
+    vector<string> devices;
+    map<string, bool> availableFunctions;
+
+    Passenger(string name, double rating, vector<string> devices, vector<struct Address*> addresses={}, vector<PaymentMethod> paymentMethods={}) :
                 Person(move(name), rating){
         this->addresses = move(addresses);
         this->paymentMethods = move(paymentMethods);
         passengerList.push_back(this);
+        this->devices = devices;
+        availableFunctions = {
+                {"specifyRide", true},
+                {"showHistory", true},
+                {"showPaymentMethods", true},
+                {"updatePaymentMethods", true},
+                {"seeCurrentCoordinates", true},
+                {"showAddresses", true},
+                {"createAddressPassenger", true},
+                {"addAddress", true},
+                {"deleteAddress", true},
+                {"requestBill", true}
+        };
+    }
+
+    void switchMobileDevice(istream& in, bool printInput) {
+        cout << "Choose mobile device you want to use" << endl;
+        int count = 1;
+        for (string curDevice : devices) {
+            cout << count << ") " << curDevice << endl;
+            count++;
+        }
+        int option;
+        in >> option;
+        cout << "You have entered the system using " << devices[option - 1] << endl;
+    }
+
+    vector<struct Address*>* getAddresses() {
+        return &addresses;
+    }
+
+    vector<PaymentMethod>* getPaymentMethod() {
+        return &paymentMethods;
     }
 
     void showPaymentMethods() {
+        if (!availableFunctions["showPaymentMethods"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
         cout << "Your payment methods: " << endl;
         int count = 0;
         for (PaymentMethod paymentMethod : paymentMethods) {
@@ -41,6 +81,14 @@ public:
             printPaymentMethod(paymentMethod);
             cout << endl;
         }
+    }
+
+    void showHistory() {
+        if (!availableFunctions["showHistory"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
+        ((Person*)this)->showHistory();
     }
 
     void addPaymentMethod(istream& in, bool printInput) {
@@ -76,7 +124,27 @@ public:
         paymentMethods.erase(paymentMethods.begin() + number - 1);
     }
 
+    void updatePaymentMethods(istream& in, bool printInput) {
+        if (!availableFunctions["updatePaymentMethods"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
+        cout << "1) delete payment method" << endl;
+        cout << "2) add payment method" << endl;
+        cout << "3) return back" << endl;
+        int option;
+        in >> option;
+        if (printInput) cout << option << endl;
+        if (option == 2) addPaymentMethod(in, printInput);
+        else if (option == 1) deletePaymentMethods(in, printInput);
+        else if (option == 3) return;
+    }
+
     void showAddresses() {
+        if (!availableFunctions["showAddresses"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
         cout << "You have following addresses: " << endl;
         int count = 0;
         for (struct Address* address : addresses)  {
@@ -87,6 +155,10 @@ public:
     }
 
     void addAddress(istream& in, bool printInput) {
+        if (!availableFunctions["addAddress"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
         int count = 0;
         cout << "There are following addresses" << endl;
         for (Address* address : addressList) {
@@ -105,6 +177,10 @@ public:
     }
 
     void deleteAddress(istream& in, bool printInput) {
+        if (!availableFunctions["deleteAddress"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
         showAddresses();
         cout << addresses.size() + 1 << ") return back" << endl;
         cout << "Which one do you want to delete? (print a number)" << endl;
@@ -116,7 +192,18 @@ public:
     }
 
     void specifyRide(istream& in, bool printInput) {
-        showAddresses();
+        if (!history.empty()) {
+            if (history.back()->endTime > time(nullptr)) {
+                cout << "You last ride has not finished yet, so you cannot create a new one" << endl;
+                return;
+            }
+        }
+        if (!availableFunctions["specifyRide"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
+        if (availableFunctions["showAddresses"]) showAddresses();
+        else cout << "You cannot see the list of your addresses because this function was blocked" << endl;
         cout << addresses.size() + 1 << ") return back" << endl;
         cout << "Choose any two (write two numbers in the format 'a b')" << endl;
         int a, b;
@@ -141,8 +228,12 @@ public:
         else if (number == 4) carType = "Business";
         Car* car = nullptr;
         for (Driver* driver : availableDriverList) {
-            if (driver->personalCar->carType == carType) {
-                car = driver->personalCar;
+            bool containRequiredCar = false;
+            for (Car* curCar : driver->personalCars) {
+                if (curCar->carType == carType && curCar->wasValidated) {
+                    car = curCar;
+                    break;
+                }
             }
         }
         if (car == nullptr) {
@@ -163,13 +254,55 @@ public:
             showPaymentMethods();
             in >> number;
             for (Driver* driver : availableDriverList) {
-                if (driver->personalCar->carType == carType) {
-                    auto ride = new struct AvailableRide(addressList[a - 1], addressList[b - 1], this, ridePrice, distance, PaymentMethod(number - 1));
-                    driver->sendMessage(ride);
+                for (Car* curCar : driver->personalCars) {
+                    if (curCar->carType == carType && curCar->wasValidated) {
+                        auto ride = new struct AvailableRide(
+                                addressList[a - 1], addressList[b - 1], this,
+                                ridePrice, distance, PaymentMethod(number - 1), curCar);
+                        driver->sendMessage(ride);
+                        break;
+                    }
                 }
             }
         }
         cout << "Wait until someone accept your ride" << endl;
+    }
+
+    void createAddressPassenger() {
+        if (!availableFunctions["createAddressPassenger"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
+        createAddress();
+    }
+
+    void seeCurrentCoordinates(istream& in) {
+        if (((Person*)this)->history.empty()) {
+            cout << "You did not have any rides" << endl;
+            return;
+        }
+        if (((Person*)this)->history.back()->startTime > time(nullptr)) {
+            cout << "Your ride has not started yet" << endl;
+        }
+        else if (((Person*)this)->history.back()->endTime < time(nullptr)) {
+            cout << "Your last ride was finished" << endl;
+        }
+        else {
+            ((Person*)this)->history.back()->printCurrentCoordinates();
+        }
+    }
+
+    void requestBill(istream& in) {
+        if (!availableFunctions["requestBill"]) {
+            cout << "This function is blocked" << endl;
+            return;
+        }
+        if (((Person*)this)->history.empty()) {
+            cout << "Your order history is empty" << endl;
+        }
+        else {
+            ((Person*)this)->history.back()->requestBill();
+        }
     }
 };
 
